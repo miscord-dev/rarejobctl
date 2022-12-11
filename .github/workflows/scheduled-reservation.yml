@@ -8,8 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/musaprg/rarejobctl:latest
-      volumes:
-        - $GITHUB_ENV:$GITHUB_ENV
       env:
         SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
