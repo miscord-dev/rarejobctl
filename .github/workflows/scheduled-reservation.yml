@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       selenium:
-        image: selenium/standalone-chrome-debug:3.141
+        image: selenium/standalone-firefox-debug:3.141
     container:
       image: ghcr.io/musaprg/rarejobctl:latest
       env:
@@ -27,7 +27,7 @@ jobs:
           rarejobctl \
             -selenium-host selenium \
             -selenium-port 4444 \
-            -selenium-browser-name chrome \
+            -selenium-browser-name firefox \
             -year ${TOMORROW_YEAR} \
             -month ${TOMORROW_MONTH} \
             -day ${TOMORROW_DAY_OF_MONTH} \
