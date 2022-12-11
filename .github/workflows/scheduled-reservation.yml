@@ -6,20 +6,23 @@ on:
 jobs:
   reserve:
     runs-on: ubuntu-latest
-    container: ghcr.io/musaprg/rarejobctl:latest
-    env:
-      SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
-      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
-      RAREJOB_EMAIL: ${{ secrets.RAREJOB_EMAIL }}
-      RAREJOB_PASSWORD: ${{ secrets.RAREJOB_PASSWORD }}
+    container:
+      image: ghcr.io/musaprg/rarejobctl:latest
+      volumes:
+        - $GITHUB_ENV:$GITHUB_ENV
+      env:
+        SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
+        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+        RAREJOB_EMAIL: ${{ secrets.RAREJOB_EMAIL }}
+        RAREJOB_PASSWORD: ${{ secrets.RAREJOB_PASSWORD }}
     steps:
       - name: Set current day of month as env variable
         env:
           TZ: 'Asia/Tokyo' # Timezone is set to JST
         run: |
-          echo "TOMORROW_YEAR=$(date -d'+1day' +'%-Y')" >> $GITHUB_ENV
-          echo "TOMORROW_MONTH=$(date -d'+1day' +'%-m')" >> $GITHUB_ENV
-          echo "TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')" >> $GITHUB_ENV
+          export TOMORROW_YEAR=$(date -d'+1day' +'%-Y')
+          export TOMORROW_MONTH=$(date -d'+1day' +'%-m')
+          export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
       - name: Reserve a next lesson
         run: rarejobctl -year ${{ env.TOMORROW_YEAR }} -month ${{ env.TOMORROW_MONTH }} -day ${{ env.TOMORROW_DAY_OF_MONTH }} -time "10:30" -margin 0
 
