@@ -253,11 +253,15 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 }
 
 func (c *client) Teardown() error {
-	if err := c.wd.Quit(); err != nil {
-		return fmt.Errorf("failed to quit current webdriver session: %w", err)
+	if c.wd != nil {
+		if err := c.wd.Quit(); err != nil {
+			return fmt.Errorf("failed to quit current webdriver session: %w", err)
+		}
 	}
-	if err := c.s.Stop(); err != nil {
-		return fmt.Errorf("failed to quit current webdriver session: %w", err)
+	if c.s != nil {
+		if err := c.s.Stop(); err != nil {
+			return fmt.Errorf("failed to quit current webdriver session: %w", err)
+		}
 	}
 	return nil
 }
