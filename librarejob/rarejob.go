@@ -97,7 +97,7 @@ func NewClient(opts ClientOpts) (Client, error) {
 		wd, err = selenium.NewRemote(caps, urlPrefix)
 		if err != nil {
 			logger.Warn("failed to access to the selenium server, retrying...", zap.Error(err))
-			time.Sleep(seleniumHealthCheckRetrySecond)
+			time.Sleep(time.Second * seleniumHealthCheckRetrySecond)
 		}
 	}
 	if err != nil {
