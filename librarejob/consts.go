@@ -43,3 +43,10 @@ const (
 	// defaultWaitTimeout is the timeout duration for checking conditions.
 	defaultWaitTimeout = time.Second * 60
 )
+
+const (
+	// maxSeleniumHealthCheckBackoffLimit is the timeout duration for checking the health of selenium server
+	maxSeleniumHealthCheckBackoffLimit = 5
+	// seleniumHealthCheckRetrySecond is the time until the next retry
+	seleniumHealthCheckRetrySecond = 10
+)

@@ -60,6 +60,9 @@ type ClientOpts struct {
 }
 
 func NewClient(opts ClientOpts) (Client, error) {
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
 	var s *selenium.Service
 	var err error
 	url := "127.0.0.1"
@@ -86,9 +89,17 @@ func NewClient(opts ClientOpts) (Client, error) {
 		browserName = opts.SeleniumBrowserName
 	}
 
-	// Connect to the WebDriver instance running locally.
 	caps := selenium.Capabilities{"browserName": browserName}
-	wd, err := selenium.NewRemote(caps, urlPrefix)
+
+	// Connect to the WebDriver instance running locally.
+	var wd selenium.WebDriver
+	for i := 0; i < maxSeleniumHealthCheckBackoffLimit; i++ {
+		wd, err = selenium.NewRemote(caps, urlPrefix)
+		if err != nil {
+			logger.Warn("failed to access to the selenium server, retrying...", zap.Error(err))
+			time.Sleep(seleniumHealthCheckRetrySecond)
+		}
+	}
 	if err != nil {
 		return nil, err
 	}
