@@ -22,5 +22,6 @@ jobs:
           export TOMORROW_MONTH=$(date -d'+1day' +'%-m')
           export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
       - name: Reserve a next lesson
-        run: rarejobctl -year ${{ env.TOMORROW_YEAR }} -month ${{ env.TOMORROW_MONTH }} -day ${{ env.TOMORROW_DAY_OF_MONTH }} -time "10:30" -margin 0
+        run: |
+          rarejobctl -year ${ TOMORROW_YEAR } -month ${ TOMORROW_MONTH } -day ${ TOMORROW_DAY_OF_MONTH } -time "10:30" -margin 0
 
