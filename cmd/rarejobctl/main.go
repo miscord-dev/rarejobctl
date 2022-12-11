@@ -15,11 +15,14 @@ import (
 )
 
 var (
-	year = flag.Int("year", time.Now().Local().Year(), "year")
-	month = flag.Int("month", int(time.Now().Local().Month()), "month")
-	day = flag.Int("day", time.Now().Day(), "day")
-	t = flag.String("time", "10:30", "time formatted in HH:MM")
-	margin = flag.Int("margin", 30, "allowed margin, unit is minute")
+	year                = flag.Int("year", time.Now().Local().Year(), "year")
+	month               = flag.Int("month", int(time.Now().Local().Month()), "month")
+	day                 = flag.Int("day", time.Now().Day(), "day")
+	t                   = flag.String("time", "10:30", "time formatted in HH:MM")
+	margin              = flag.Int("margin", 30, "allowed margin, unit is minute")
+	seleniumPort        = flag.Int("selenium-port", 4444, "Remote Selenium port")
+	seleniumHost        = flag.String("selenium-host", "127.0.0.1", "Remote Selenium Hostname")
+	seleniumBrowserName = flag.String("selenium-browser-name", "firefox", "Remote Selenium Browser name")
 )
 
 func init() {
@@ -35,7 +38,12 @@ func main() {
 
 	logger.Info("start initialization of rarejob client")
 
-	rc, err := librarejob.NewClient()
+	opts := librarejob.ClientOpts{
+		SeleniumHost:        *seleniumHost,
+		SeleniumPort:        seleniumPort,
+		SeleniumBrowserName: *seleniumBrowserName,
+	}
+	rc, err := librarejob.NewClient(opts)
 	if err != nil {
 		api.PostMessage(os.Getenv("SLACK_CHANNEL"), slack.MsgOptionText("something went wrong... I failed to reserve your tutor. try again later.", false), slack.MsgOptionAsUser(true))
 		logger.Fatal("failed to create rarejob client", zap.Error(err))

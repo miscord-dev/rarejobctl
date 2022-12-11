@@ -45,7 +45,7 @@ func generateTutorSearchQuery(from, by time.Time) (string, error) {
 	return fmt.Sprintf(rarejobTutorSearchURL, from.Local().Year(), from.Local().Month(), from.Local().Day(), s, e), nil
 }
 
-func parseTime(s string) (h,m int, err error) {
+func parseTime(s string) (h, m int, err error) {
 	if t := strings.Split(s, ":"); len(t) == 2 {
 		h, err = strconv.Atoi(t[0])
 		if err != nil {

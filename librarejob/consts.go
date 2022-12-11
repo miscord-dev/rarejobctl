@@ -20,21 +20,21 @@ const (
 	//	https://www.rarejob.com/reservation/?year=2022&month=10&day=9&page=1&lessonTime_from=1000&lessonTime_to=1030&characteristics=4&isSaveCookie=1&order=1
 	rarejobTutorSearchURL = "https://www.rarejob.com/reservation/?year=%d&month=%d&day=%d&page=1&lessonTime_from=%d&lessonTime_to=%d&freeWord_target=1&characteristics=4&order=1"
 
-	rarejobLoginURL = "https://www.rarejob.com/account/login/"
+	rarejobLoginURL             = "https://www.rarejob.com/account/login/"
 	rarejobReservationFinishURL = "https://www.rarejob.com/reservation/reserve/finish/"
 )
 
 const (
-	loginPageEmailSelector = "#RJ_LoginForm_email"
+	loginPageEmailSelector    = "#RJ_LoginForm_email"
 	loginPagePasswordSelector = "#RJ_LoginForm_password"
-	loginPageFormSelector = "#rj--login-form"
+	loginPageFormSelector     = "#rj--login-form"
 
-	tutorListSelector = ".o-listItem"
-	tutorListItemSelector = ".o-listItem:nth-child(%d)"
-	tutorTimeSlotSelector = ".o-listItem:nth-child(%d) .o-listItem__slot"
-	tutorNameSelector = ".o-listItem:nth-child(%d) .o-listItem__ttl"
+	tutorListSelector           = ".o-listItem"
+	tutorListItemSelector       = ".o-listItem:nth-child(%d)"
+	tutorTimeSlotSelector       = ".o-listItem:nth-child(%d) .o-listItem__slot"
+	tutorNameSelector           = ".o-listItem:nth-child(%d) .o-listItem__ttl"
 	tutorTimeSlotButtonSelector = ".o-listItem:nth-child(%d) .o-listItem__slot:nth-child(%d) > .a-squareBtn"
-	tutorReserveButtonSelector = ".lessonReserve__tutorInfoBtn > div > a"
+	tutorReserveButtonSelector  = ".lessonReserve__tutorInfoBtn > div > a"
 )
 
 const (

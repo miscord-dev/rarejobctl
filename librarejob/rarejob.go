@@ -17,29 +17,29 @@ import (
 //  once rarejob_onetime_key and PHPSESSID are deleted, session is closed and we're redirected to login page.
 
 type Reserve struct {
-	Name string
+	Name    string
 	StartAt time.Time
-	EndAt time.Time
+	EndAt   time.Time
 }
 
 type Tutor struct {
-	Name string
+	Name           string
 	AvailableSlots []time.Time
 }
 
 func (t Tutor) MarshalLogObject(enc zapcore.ObjectEncoder) error {
-    enc.AddString("name", t.Name)
+	enc.AddString("name", t.Name)
 	// TODO(musaprg): output availableslots
-    return nil
+	return nil
 }
 
 type Tutors []Tutor
 
 func (ts Tutors) MarshalLogArray(enc zapcore.ArrayEncoder) error {
-    for _, t := range ts {
-        enc.AppendObject(t)
-    }
-    return nil
+	for _, t := range ts {
+		enc.AppendObject(t)
+	}
+	return nil
 }
 
 type Client interface {
@@ -49,40 +49,70 @@ type Client interface {
 }
 
 type client struct {
-	s *selenium.Service
+	s  *selenium.Service
 	wd selenium.WebDriver
 }
 
-func NewClient() (Client, error) {
+type ClientOpts struct {
+	SeleniumHost        string
+	SeleniumPort        *int
+	SeleniumBrowserName string
+}
+
+func NewClient(opts ClientOpts) (Client, error) {
+	var s *selenium.Service
+	var err error
+	url := "127.0.0.1"
+	port := 4444
+	browserName := "firefox"
+	if opts.SeleniumHost == "" {
+		if opts.SeleniumPort != nil {
+			port = *opts.SeleniumPort
+		}
+		s, err = startLocalSelenium(port)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if opts.SeleniumHost != "" {
+		url = opts.SeleniumHost
+	}
+	if opts.SeleniumPort != nil {
+		port = *opts.SeleniumPort
+	}
+	urlPrefix := fmt.Sprintf("http://%s:%d/wd/hub", url, port)
+
+	if opts.SeleniumBrowserName != "" {
+		browserName = opts.SeleniumBrowserName
+	}
+
+	// Connect to the WebDriver instance running locally.
+	caps := selenium.Capabilities{"browserName": browserName}
+	wd, err := selenium.NewRemote(caps, urlPrefix)
+	if err != nil {
+		return nil, err
+	}
+
+	return &client{
+		s:  s,
+		wd: wd,
+	}, nil
+}
+
+func startLocalSelenium(port int) (*selenium.Service, error) {
 	// Start a Selenium WebDriver server instance (if one is not already
 	// running).
 	const (
 		// These paths will be different on your system.
 		seleniumPath    = "/opt/selenium/selenium-server-standalone.jar"
 		geckoDriverPath = "/usr/bin/geckodriver"
-		port            = 8080
 	)
-	opts := []selenium.ServiceOption{
+	so := []selenium.ServiceOption{
 		selenium.StartFrameBuffer(),           // Start an X frame buffer for the browser to run in.
 		selenium.GeckoDriver(geckoDriverPath), // Specify the path to GeckoDriver in order to use Firefox.
 	}
 	selenium.SetDebug(false)
-	service, err := selenium.NewSeleniumService(seleniumPath, port, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	// Connect to the WebDriver instance running locally.
-	caps := selenium.Capabilities{"browserName": "firefox"}
-	wd, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", port))
-	if err != nil {
-		return nil, err
-	}
-
-	return &client{
-		s: service,
-		wd: wd,
-	}, nil
+	return selenium.NewSeleniumService(seleniumPath, port, so...)
 }
 
 func (c *client) Login(ctx context.Context, username, password string) error {
@@ -131,7 +161,7 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 	// -- Search available tutors --
 
 	by := from.Local().Add(margin)
-	if !(margin < 24 * time.Hour && from.Hour() < by.Hour()) {
+	if !(margin < 24*time.Hour && from.Hour() < by.Hour()) {
 		return nil, ErrSpreadAcrossTwoDays
 	}
 
@@ -166,14 +196,14 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 				slots = append(slots, time.Time{})
 			}
 			slotText, _ := slotElm.Text()
-			h,m,err := parseTime(slotText)
+			h, m, err := parseTime(slotText)
 			if err != nil {
 				slots = append(slots, time.Time{})
 			}
 			slots = append(slots, time.Date(from.Year(), from.Month(), from.Day(), h, m, 0, 0, time.Local))
 		}
 		tutors = append(tutors, Tutor{
-			Name: name,
+			Name:           name,
 			AvailableSlots: slots,
 		})
 	}
@@ -205,9 +235,9 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 	waitUntilURLChanged(c.wd, rarejobReservationFinishURL)
 
 	return &Reserve{
-		Name: tutors[0].Name,
+		Name:    tutors[0].Name,
 		StartAt: tutors[0].AvailableSlots[0],
-		EndAt: tutors[0].AvailableSlots[0].Add(25 * time.Minute),
+		EndAt:   tutors[0].AvailableSlots[0].Add(25 * time.Minute),
 	}, nil
 }
 
