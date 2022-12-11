@@ -13,7 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o rarejobctl ./cmd/
 
 
 # Selenium webdriver
-FROM gcr.io/distroless/static-debian11
+FROM selenium/standalone-firefox-debug:latest
 COPY --from=builder /src/rarejobctl /usr/bin/
 CMD ["rarejobctl"]
 
