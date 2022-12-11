@@ -14,14 +14,12 @@ jobs:
         RAREJOB_EMAIL: ${{ secrets.RAREJOB_EMAIL }}
         RAREJOB_PASSWORD: ${{ secrets.RAREJOB_PASSWORD }}
     steps:
-      - name: Set current day of month as env variable
+      - name: Reserve a next lesson
         env:
           TZ: 'Asia/Tokyo' # Timezone is set to JST
         run: |
           export TOMORROW_YEAR=$(date -d'+1day' +'%-Y')
           export TOMORROW_MONTH=$(date -d'+1day' +'%-m')
           export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
-      - name: Reserve a next lesson
-        run: |
           rarejobctl -year ${TOMORROW_YEAR} -month ${TOMORROW_MONTH} -day ${TOMORROW_DAY_OF_MONTH} -time "10:30" -margin 0
 
