@@ -6,9 +6,6 @@ on:
 jobs:
   reserve:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     container:
       image: ghcr.io/musaprg/rarejobctl:latest
       env:
@@ -26,5 +23,5 @@ jobs:
           export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
       - name: Reserve a next lesson
         run: |
-          rarejobctl -year ${ TOMORROW_YEAR } -month ${ TOMORROW_MONTH } -day ${ TOMORROW_DAY_OF_MONTH } -time "10:30" -margin 0
+          rarejobctl -year ${TOMORROW_YEAR} -month ${TOMORROW_MONTH} -day ${TOMORROW_DAY_OF_MONTH} -time "10:30" -margin 0
 
