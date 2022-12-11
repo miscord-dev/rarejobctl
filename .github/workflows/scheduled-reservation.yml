@@ -6,10 +6,11 @@ on:
 jobs:
   reserve:
     runs-on: ubuntu-latest
+    services:
+      selenium:
+        image: selenium/standalone-chrome-debug:3.141
     container:
       image: ghcr.io/musaprg/rarejobctl:latest
-      ports:
-        - "8080:8080"
       env:
         SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
@@ -23,4 +24,12 @@ jobs:
           export TOMORROW_YEAR=$(date -d'+1day' +'%-Y')
           export TOMORROW_MONTH=$(date -d'+1day' +'%-m')
           export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
-          rarejobctl -year ${TOMORROW_YEAR} -month ${TOMORROW_MONTH} -day ${TOMORROW_DAY_OF_MONTH} -time "10:30" -margin 0
+          rarejobctl \
+            -selenium-host selenium \
+            -selenium-port 4444 \
+            -selenium-browser-name chrome \
+            -year ${TOMORROW_YEAR} \
+            -month ${TOMORROW_MONTH} \
+            -day ${TOMORROW_DAY_OF_MONTH} \
+            -time "10:30" \
+            -margin 0
