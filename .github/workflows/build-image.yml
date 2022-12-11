@@ -1,8 +1,6 @@
 name: Build a container image
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*'
 jobs:
