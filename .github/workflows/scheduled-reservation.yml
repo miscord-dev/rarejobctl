@@ -1,13 +1,15 @@
 name: Reserve next daily lesson
 on:
   schedule:
-    - cron: '0 12 * * *' # execute at every 21:00 (JST)
+    - cron: "0 12 * * *" # execute at every 21:00 (JST)
   workflow_dispatch:
 jobs:
   reserve:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/musaprg/rarejobctl:latest
+      ports:
+        - "8080:8080"
       env:
         SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
@@ -16,10 +18,9 @@ jobs:
     steps:
       - name: Reserve a next lesson
         env:
-          TZ: 'Asia/Tokyo' # Timezone is set to JST
+          TZ: "Asia/Tokyo" # Timezone is set to JST
         run: |
           export TOMORROW_YEAR=$(date -d'+1day' +'%-Y')
           export TOMORROW_MONTH=$(date -d'+1day' +'%-m')
           export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
           rarejobctl -year ${TOMORROW_YEAR} -month ${TOMORROW_MONTH} -day ${TOMORROW_DAY_OF_MONTH} -time "10:30" -margin 0
-
