@@ -172,7 +172,7 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 	// -- Search available tutors --
 
 	by := from.Local().Add(margin)
-	if !(margin < 24*time.Hour && from.Hour() < by.Hour()) {
+	if !(margin < 24*time.Hour && from.Hour() <= by.Hour()) {
 		return nil, ErrSpreadAcrossTwoDays
 	}
 
