@@ -25,6 +25,11 @@ var (
 	seleniumBrowserName = flag.String("selenium-browser-name", "firefox", "Remote Selenium Browser name")
 )
 
+const (
+	// maxRetryReservation is the number of retry when the reservation failes somehow.
+	maxRetryReservation = 5
+)
+
 func init() {
 	flag.Parse()
 }
@@ -70,8 +75,16 @@ func main() {
 	from := time.Date(*year, time.Month(*month), *day, hour, minute, 0, 0, time.Local)
 	margin := 30 * time.Minute
 
+	var r *librarejob.Reserve
+
 	logger.Info("start reserving tutor", zap.Int("year", *year), zap.Int("month", *month), zap.Int("day", *day), zap.String("time", *t))
-	r, err := rc.ReserveTutor(context.TODO(), from, margin)
+	for attempt := 0; attempt < maxRetryReservation; attempt++ {
+		r, err = rc.ReserveTutor(context.TODO(), from, margin)
+		if err != nil {
+			logger.Warn("failed to reserve tutor. retrying...", zap.Error(err))
+		}
+	}
+
 	if err != nil {
 		api.PostMessage(os.Getenv("SLACK_CHANNEL"), slack.MsgOptionText("something went wrong... I failed to reserve your tutor. try again later.", false), slack.MsgOptionAsUser(true))
 		logger.Fatal("failed to reserve tutor", zap.Error(err))
