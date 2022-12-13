@@ -73,13 +73,12 @@ func main() {
 	hour, _ := strconv.Atoi(tt[0])
 	minute, _ := strconv.Atoi(tt[1])
 	from := time.Date(*year, time.Month(*month), *day, hour, minute, 0, 0, time.Local)
-	margin := 30 * time.Minute
 
 	var r *librarejob.Reserve
 
 	logger.Info("start reserving tutor", zap.Int("year", *year), zap.Int("month", *month), zap.Int("day", *day), zap.String("time", *t))
 	for attempt := 0; attempt < maxRetryReservation; attempt++ {
-		r, err = rc.ReserveTutor(context.TODO(), from, margin)
+		r, err = rc.ReserveTutor(context.TODO(), from, time.Minute*time.Duration(*margin))
 		if r != nil {
 			break
 		}
