@@ -1,10 +1,7 @@
 name: Reserve next daily lesson
 on:
   schedule:
-    - cron: "0 3 * * *" # execute at every 12:00 (JST)
-    - cron: "0 6 * * *" # execute at every 15:00 (JST)
-    - cron: "0 9 * * *"  # execute at every 18:00 (JST)
-    - cron: "0 12 * * *" # execute at every 21:00 (JST)
+    - cron: "0 13 * * *" # execute at every 22:00 (JST)
   workflow_dispatch:
 jobs:
   reserve:
