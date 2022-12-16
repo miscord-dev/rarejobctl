@@ -31,5 +31,5 @@ jobs:
             -year ${TOMORROW_YEAR} \
             -month ${TOMORROW_MONTH} \
             -day ${TOMORROW_DAY_OF_MONTH} \
-            -time "10:00" \
+            -time "9:30" \
             -margin 30
