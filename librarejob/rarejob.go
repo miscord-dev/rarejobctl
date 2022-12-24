@@ -57,11 +57,11 @@ type ClientOpts struct {
 	SeleniumHost        string
 	SeleniumPort        *int
 	SeleniumBrowserName string
+	SeleniumDebug       bool
 }
 
 func NewClient(opts ClientOpts) (Client, error) {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
+	defer zap.L().Sync()
 
 	var s *selenium.Service
 	var err error
@@ -72,7 +72,7 @@ func NewClient(opts ClientOpts) (Client, error) {
 		if opts.SeleniumPort != nil {
 			port = *opts.SeleniumPort
 		}
-		s, err = startLocalSelenium(port)
+		s, err = startLocalSelenium(port, opts.SeleniumDebug)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func NewClient(opts ClientOpts) (Client, error) {
 	for i := 0; i < maxSeleniumHealthCheckBackoffLimit; i++ {
 		wd, err = selenium.NewRemote(caps, urlPrefix)
 		if err != nil {
-			logger.Warn("failed to access to the selenium server, retrying...", zap.Error(err))
+			zap.L().Warn("failed to access to the selenium server, retrying...", zap.Error(err))
 			time.Sleep(time.Second * seleniumHealthCheckRetrySecond)
 		}
 	}
@@ -110,7 +110,7 @@ func NewClient(opts ClientOpts) (Client, error) {
 	}, nil
 }
 
-func startLocalSelenium(port int) (*selenium.Service, error) {
+func startLocalSelenium(port int, debug bool) (*selenium.Service, error) {
 	// Start a Selenium WebDriver server instance (if one is not already
 	// running).
 	const (
@@ -122,7 +122,10 @@ func startLocalSelenium(port int) (*selenium.Service, error) {
 		selenium.StartFrameBuffer(),           // Start an X frame buffer for the browser to run in.
 		selenium.GeckoDriver(geckoDriverPath), // Specify the path to GeckoDriver in order to use Firefox.
 	}
-	selenium.SetDebug(false)
+	if debug {
+		so = append(so, selenium.Output(os.Stdout))
+		selenium.SetDebug(debug)
+	}
 	return selenium.NewSeleniumService(seleniumPath, port, so...)
 }
 
@@ -164,8 +167,7 @@ func (c *client) Login(ctx context.Context, username, password string) error {
 }
 
 func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.Duration) (*Reserve, error) {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
+	defer zap.L().Sync()
 
 	// TODO(musaprg): split this function into two
 
@@ -193,7 +195,7 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 	var tutors Tutors
 	// TODO(musaprg): parallelize with goroutine and use errgroup to aggregate error
 	for tnum := 1; tnum <= len(tutorList); tnum++ {
-		logger.Debug("getting tutor info", zap.Int("number", tnum))
+		zap.L().Debug("getting tutor info", zap.Int("number", tnum), zap.String("url", c.getCurrentURL()))
 		nameElm, _ := c.wd.FindElement(selenium.ByCSSSelector, fmt.Sprintf(tutorNameSelector, tnum))
 		name, _ := nameElm.Text()
 		slotElms, err := c.wd.FindElements(selenium.ByCSSSelector, fmt.Sprintf(tutorTimeSlotSelector, tnum))
@@ -219,7 +221,7 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 		})
 	}
 
-	logger.Info("found tutors", zap.Array("tutors", tutors))
+	zap.L().Info("found tutors", zap.Array("tutors", tutors))
 
 	// -- Do reservation --
 
@@ -232,13 +234,11 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 	}
 	timeSlot.Click()
 
-	if url, _ := c.wd.CurrentURL(); url != "" {
-		logger.Debug("current url:", zap.String("url", url))
-	}
-
+	zap.L().Debug("loading reservation page", zap.String("url", c.getCurrentURL()))
 	waitUntilElementLoaded(c.wd, selenium.ByLinkText, "予約する")
 	reserveButton, err := c.wd.FindElement(selenium.ByLinkText, "予約する")
 	if err != nil {
+		zap.L().Debug("failed to get reserve button", zap.Error(err), zap.String("url", c.getCurrentURL()))
 		return nil, fmt.Errorf("failed to get reserve button: %w", err)
 	}
 	reserveButton.Click()

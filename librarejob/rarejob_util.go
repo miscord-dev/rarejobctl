@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/tebeka/selenium"
+	"go.uber.org/zap"
 )
 
 // TODO(musaprg): dirty logic, needs to be refactored
@@ -26,6 +27,7 @@ func waitUntilURLChanged(wd selenium.WebDriver, url string) error {
 	u := ""
 	if waitErr := wd.WaitWithTimeoutAndInterval(func(wd selenium.WebDriver) (bool, error) {
 		u, err = wd.CurrentURL()
+		zap.L().Debug("checking if the url has been changed", zap.String("url", u))
 		return u == url, nil
 	}, defaultWaitTimeout, defaultWaitInterval); waitErr != nil {
 		return err
@@ -57,4 +59,12 @@ func parseTime(s string) (h, m int, err error) {
 		}
 	}
 	return
+}
+
+func (c *client) getCurrentURL() string {
+	url, err := c.wd.CurrentURL()
+	if err != nil {
+		zap.L().Debug("current url is empty", zap.Error(err))
+	}
+	return url
 }
