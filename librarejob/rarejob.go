@@ -232,18 +232,29 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 	if err != nil {
 		return nil, fmt.Errorf("failed to find time slot button: %w", err)
 	}
-	timeSlot.Click()
+	{
+		text, _ := timeSlot.Text()
+		zap.L().Debug("found time slot button", zap.String("button_text", text))
+	}
+	if err := timeSlot.Click(); err != nil {
+		return nil, fmt.Errorf("failed to click time slot button: %w", err)
+	}
 
 	zap.L().Debug("loading reservation page", zap.String("url", c.getCurrentURL()))
 	waitUntilElementLoaded(c.wd, selenium.ByLinkText, "予約する")
+	zap.L().Debug("loaded reservation page", zap.String("url", c.getCurrentURL()))
 	reserveButton, err := c.wd.FindElement(selenium.ByLinkText, "予約する")
 	if err != nil {
 		zap.L().Debug("failed to get reserve button", zap.Error(err), zap.String("url", c.getCurrentURL()))
 		return nil, fmt.Errorf("failed to get reserve button: %w", err)
 	}
-	reserveButton.Click()
+	if err := reserveButton.Click(); err != nil {
+		return nil, fmt.Errorf("failed to click reserve button: %w", err)
+	}
 
+	zap.L().Debug("waiting for completion of reservation")
 	waitUntilURLChanged(c.wd, rarejobReservationFinishURL)
+	zap.L().Debug("reservation completed")
 
 	return &Reserve{
 		Name:    tutors[0].Name,
