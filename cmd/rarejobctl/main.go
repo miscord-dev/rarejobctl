@@ -24,11 +24,7 @@ var (
 	seleniumHost        = flag.String("selenium-host", "", "Remote Selenium Hostname")
 	seleniumBrowserName = flag.String("selenium-browser-name", "firefox", "Remote Selenium Browser name")
 	debug               = flag.Bool("debug", false, "enable debug mode")
-)
-
-const (
-	// maxRetryReservation is the number of retry when the reservation failes somehow.
-	maxRetryReservation = 5
+    maxRetryReservation = flag.Int("max-retry", 5, "max number of attempts for reservation")
 )
 
 func init() {
@@ -88,7 +84,7 @@ func main() {
 	var r *librarejob.Reserve
 
 	zap.L().Info("start reserving tutor", zap.Int("year", *year), zap.Int("month", *month), zap.Int("day", *day), zap.String("time", *t))
-	for attempt := 0; attempt < maxRetryReservation; attempt++ {
+	for attempt := 0; attempt < *maxRetryReservation; attempt++ {
 		r, err = rc.ReserveTutor(context.TODO(), from, time.Minute*time.Duration(*margin))
 		if r != nil {
 			break
