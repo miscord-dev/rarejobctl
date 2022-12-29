@@ -24,7 +24,7 @@ var (
 	seleniumHost        = flag.String("selenium-host", "", "Remote Selenium Hostname")
 	seleniumBrowserName = flag.String("selenium-browser-name", "firefox", "Remote Selenium Browser name")
 	debug               = flag.Bool("debug", false, "enable debug mode")
-    maxRetryReservation = flag.Int("max-retry", 5, "max number of attempts for reservation")
+	maxRetryReservation = flag.Int("max-retry", 5, "max number of attempts for reservation")
 )
 
 func init() {
