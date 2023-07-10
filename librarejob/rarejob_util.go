@@ -14,7 +14,12 @@ import (
 func waitUntilElementLoaded(wd selenium.WebDriver, by, value string) error {
 	var err error
 	if waitErr := wd.WaitWithTimeoutAndInterval(func(wd selenium.WebDriver) (bool, error) {
-		_, err = wd.FindElement(by, value)
+		elm, err := wd.FindElement(by, value)
+		zap.L().Debug("checking if the element has been loaded", zap.String("by", by), zap.String("value", value))
+		if err == nil {
+			text, _ := elm.Text()
+			zap.L().Debug("element has been loaded", zap.String("by", by), zap.String("value", value), zap.String("text", text))
+		}
 		return err == nil, nil
 	}, defaultWaitTimeout, defaultWaitInterval); waitErr != nil {
 		return err
@@ -27,6 +32,9 @@ func waitUntilURLChanged(wd selenium.WebDriver, url string) error {
 	u := ""
 	if waitErr := wd.WaitWithTimeoutAndInterval(func(wd selenium.WebDriver) (bool, error) {
 		u, err = wd.CurrentURL()
+		if err != nil {
+			return false, err
+		}
 		zap.L().Debug("checking if the url has been changed", zap.String("url", u))
 		return u == url, nil
 	}, defaultWaitTimeout, defaultWaitInterval); waitErr != nil {
