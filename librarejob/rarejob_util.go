@@ -12,17 +12,16 @@ import (
 
 // TODO(musaprg): dirty logic, needs to be refactored
 func waitUntilElementLoaded(wd selenium.WebDriver, by, value string) error {
-	var err error
 	if waitErr := wd.WaitWithTimeoutAndInterval(func(wd selenium.WebDriver) (bool, error) {
 		elm, err := wd.FindElement(by, value)
 		zap.L().Debug("checking if the element has been loaded", zap.String("by", by), zap.String("value", value))
 		if err == nil {
 			text, _ := elm.Text()
-			zap.L().Debug("element has been loaded", zap.String("by", by), zap.String("value", value), zap.String("text", text))
+			zap.L().Debug("element has been loaded", zap.String("by", by), zap.String("value", value), zap.String("text", text), zap.Error(err))
 		}
 		return err == nil, nil
 	}, defaultWaitTimeout, defaultWaitInterval); waitErr != nil {
-		return err
+		return waitErr
 	}
 	return nil
 }
