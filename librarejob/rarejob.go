@@ -85,12 +85,12 @@ func NewClient(opts ClientOpts) (Client, error) {
 	if opts.SeleniumPort != nil {
 		port = *opts.SeleniumPort
 	}
-	urlPrefix := fmt.Sprintf("http://%s:%d/wd/hub", url, port)
 
 	if opts.SeleniumBrowserName != "" {
 		browserName = opts.SeleniumBrowserName
 	}
 
+	urlPrefix := fmt.Sprintf("http://%s:%d/wd/hub", url, port)
 	caps := selenium.Capabilities{"browserName": browserName}
 
 	// Connect to the WebDriver instance running locally.
@@ -157,26 +157,36 @@ func (c *client) Login(ctx context.Context, username, password string) error {
 		return fmt.Errorf("failed to find the email input box: %w", err)
 	} else {
 		zap.L().Debug("typing email", zap.String("url", c.getCurrentURL()))
-		emailInput.SendKeys(os.Getenv("RAREJOB_EMAIL"))
+		err := emailInput.SendKeys(os.Getenv("RAREJOB_EMAIL"))
+		if err != nil {
+			return fmt.Errorf("failed to type email: %w", err)
+		}
 	}
 
 	if passwordInput, err := c.wd.FindElement(selenium.ByCSSSelector, loginPagePasswordSelector); err != nil {
 		return fmt.Errorf("failed to find the password input box: %w", err)
 	} else {
 		zap.L().Debug("typing password", zap.String("url", c.getCurrentURL()))
-		passwordInput.SendKeys(os.Getenv("RAREJOB_PASSWORD"))
+		err := passwordInput.SendKeys(os.Getenv("RAREJOB_PASSWORD"))
+		if err != nil {
+			return fmt.Errorf("failed to type password: %w", err)
+		}
 	}
 
-	if submit, err := c.wd.FindElement(selenium.ByName, "yt0"); err != nil {
+	if submit, err := c.wd.FindElement(selenium.ByCSSSelector, "input[type='submit']"); err != nil {
 		return fmt.Errorf("failed to find submit button: %w", err)
 	} else {
-		zap.L().Debug("clicking submit button", zap.String("url", c.getCurrentURL()))
-		submit.Click()
+		zap.L().Debug("click submit button", zap.String("url", c.getCurrentURL()))
+		err := submit.Click()
+		if err != nil {
+			return fmt.Errorf("failed to submit login form: %w", err)
+		}
 	}
 
 	if err := c.wd.Wait(func(wd selenium.WebDriver) (bool, error) {
 		zap.L().Debug("checking if the login has been completed", zap.String("url", c.getCurrentURL()))
-		return wd.SessionID() != "", nil
+		_, err := c.wd.GetCookie("PHPSESSID")
+		return err == nil, nil
 	}); err != nil {
 		return fmt.Errorf("login failed: %w", err)
 	}
