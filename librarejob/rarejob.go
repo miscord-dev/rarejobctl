@@ -139,38 +139,50 @@ func startLocalSelenium(port int, debug bool) (*selenium.Service, error) {
 }
 
 func (c *client) Login(ctx context.Context, username, password string) error {
+	defer zap.L().Sync()
+
+	zap.L().Debug("loading login page", zap.String("url", c.getCurrentURL()))
+
 	// TODO(musaprg): Cache SESSIONID and reuse
 	if err := c.wd.Get(rarejobLoginURL); err != nil {
 		return fmt.Errorf("failed to access rarejob login page: %w", err)
 	}
 
 	_ = waitUntilElementLoaded(c.wd, selenium.ByCSSSelector, loginPageEmailSelector)
+	_ = waitUntilElementLoaded(c.wd, selenium.ByCSSSelector, loginPagePasswordSelector)
+	c.saveCurrentScreenshot(rarejobctlTempDir, "login_page.png")
+	zap.L().Debug("login page has been loaded", zap.String("url", c.getCurrentURL()))
 
 	if emailInput, err := c.wd.FindElement(selenium.ByCSSSelector, loginPageEmailSelector); err != nil {
 		return fmt.Errorf("failed to find the email input box: %w", err)
 	} else {
+		zap.L().Debug("typing email", zap.String("url", c.getCurrentURL()))
 		emailInput.SendKeys(os.Getenv("RAREJOB_EMAIL"))
 	}
-
-	_ = waitUntilElementLoaded(c.wd, selenium.ByCSSSelector, loginPagePasswordSelector)
 
 	if passwordInput, err := c.wd.FindElement(selenium.ByCSSSelector, loginPagePasswordSelector); err != nil {
 		return fmt.Errorf("failed to find the password input box: %w", err)
 	} else {
+		zap.L().Debug("typing password", zap.String("url", c.getCurrentURL()))
 		passwordInput.SendKeys(os.Getenv("RAREJOB_PASSWORD"))
 	}
 
 	if submit, err := c.wd.FindElement(selenium.ByName, "yt0"); err != nil {
 		return fmt.Errorf("failed to find submit button: %w", err)
 	} else {
+		zap.L().Debug("clicking submit button", zap.String("url", c.getCurrentURL()))
 		submit.Click()
 	}
 
 	if err := c.wd.Wait(func(wd selenium.WebDriver) (bool, error) {
+		zap.L().Debug("checking if the login has been completed", zap.String("url", c.getCurrentURL()))
 		return wd.SessionID() != "", nil
 	}); err != nil {
 		return fmt.Errorf("login failed: %w", err)
 	}
+
+	zap.L().Debug("login completed", zap.String("url", c.getCurrentURL()))
+	c.saveCurrentScreenshot(rarejobctlTempDir, "login_completed.png")
 
 	return nil
 }
