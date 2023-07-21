@@ -50,3 +50,8 @@ const (
 	// seleniumHealthCheckRetrySecond is the time until the next retry
 	seleniumHealthCheckRetrySecond = 10
 )
+
+const (
+	// rarejobctlTempDir is the temporary directory for rarejobctl to store files for debugging
+	rarejobctlTempDir = "/tmp/rarejobctl"
+)

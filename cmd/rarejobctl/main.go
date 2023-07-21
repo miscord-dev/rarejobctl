@@ -54,6 +54,7 @@ func main() {
 		SeleniumHost:        *seleniumHost,
 		SeleniumPort:        seleniumPort,
 		SeleniumBrowserName: *seleniumBrowserName,
+		ClientDebug:         *debug,
 	}
 	rc, err := librarejob.NewClient(opts)
 	if err != nil {

@@ -49,8 +49,9 @@ type Client interface {
 }
 
 type client struct {
-	s  *selenium.Service
-	wd selenium.WebDriver
+	s     *selenium.Service
+	wd    selenium.WebDriver
+	debug bool
 }
 
 type ClientOpts struct {
@@ -58,6 +59,7 @@ type ClientOpts struct {
 	SeleniumPort        *int
 	SeleniumBrowserName string
 	SeleniumDebug       bool
+	ClientDebug         bool
 }
 
 func NewClient(opts ClientOpts) (Client, error) {
@@ -104,9 +106,16 @@ func NewClient(opts ClientOpts) (Client, error) {
 		return nil, err
 	}
 
+	if opts.ClientDebug {
+		if err := os.MkdirAll(rarejobctlTempDir, 0755); err != nil {
+			return nil, fmt.Errorf("failed to create temporary directory for rarejobctl: %w", err)
+		}
+	}
+
 	return &client{
-		s:  s,
-		wd: wd,
+		s:     s,
+		wd:    wd,
+		debug: opts.ClientDebug,
 	}, nil
 }
 
@@ -187,6 +196,7 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 	}
 
 	waitUntilElementLoaded(c.wd, selenium.ByCSSSelector, tutorListSelector)
+	c.saveCurrentScreenshot(rarejobctlTempDir, "tutor_list.png")
 	tutorList, err := c.wd.FindElements(selenium.ByCSSSelector, tutorListSelector)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tutor info: %w", err)
@@ -227,6 +237,7 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 
 	timeSlotButtonSelector := fmt.Sprintf(tutorTimeSlotButtonSelector, 1, 1)
 	waitUntilElementLoaded(c.wd, selenium.ByCSSSelector, timeSlotButtonSelector)
+	c.saveCurrentScreenshot(rarejobctlTempDir, "tutor_reservation.png")
 	// TODO(musaprg): Implement to select tutor, not hard-coded
 	timeSlot, err := c.wd.FindElement(selenium.ByCSSSelector, timeSlotButtonSelector)
 	if err != nil {
@@ -242,6 +253,7 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 
 	zap.L().Debug("loading reservation page", zap.String("url", c.getCurrentURL()))
 	waitUntilElementLoaded(c.wd, selenium.ByLinkText, "予約する")
+	c.saveCurrentScreenshot(rarejobctlTempDir, "reservation_page.png")
 	zap.L().Debug("loaded reservation page", zap.String("url", c.getCurrentURL()))
 	reserveButton, err := c.wd.FindElement(selenium.ByLinkText, "予約する")
 	if err != nil {
@@ -254,6 +266,7 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 
 	zap.L().Debug("waiting for completion of reservation")
 	waitUntilURLChanged(c.wd, rarejobReservationFinishURL)
+	c.saveCurrentScreenshot(rarejobctlTempDir, "reservation_completed.png")
 	zap.L().Debug("reservation completed")
 
 	return &Reserve{
