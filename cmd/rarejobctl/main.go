@@ -86,12 +86,13 @@ func main() {
 
 	zap.L().Info("start reserving tutor", zap.Int("year", *year), zap.Int("month", *month), zap.Int("day", *day), zap.String("time", *t))
 	for attempt := 0; attempt < *maxRetryReservation; attempt++ {
+		zap.L().Info("attempting to reserve tutor", zap.Int("attempt", attempt+1))
 		r, err = rc.ReserveTutor(context.TODO(), from, time.Minute*time.Duration(*margin))
 		if r != nil {
 			break
 		}
 		if err != nil {
-			zap.L().Warn("failed to reserve tutor. retrying...", zap.Error(err))
+			zap.L().Warn("failed to reserve tutor. retrying...", zap.Error(err), zap.Int("attempt", attempt+1))
 		}
 	}
 	if err != nil {
