@@ -185,8 +185,16 @@ func (c *client) Login(ctx context.Context, username, password string) error {
 
 	if err := c.wd.Wait(func(wd selenium.WebDriver) (bool, error) {
 		zap.L().Debug("checking if the login has been completed", zap.String("url", c.getCurrentURL()))
-		_, err := c.wd.GetCookie("PHPSESSID")
-		return err == nil, nil
+		cks, err := c.wd.GetCookies()
+		if err != nil {
+			return false, err
+		}
+		for _, ck := range cks {
+			if ck.Name == "PHPSESSID" && ck.Domain == "www.rarejob.com" {
+				return true, nil
+			}
+		}
+		return false, nil
 	}); err != nil {
 		return fmt.Errorf("login failed: %w", err)
 	}
