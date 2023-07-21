@@ -2,6 +2,9 @@ package librarejob
 
 import (
 	"fmt"
+	"io/fs"
+	"io/ioutil"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -74,4 +77,21 @@ func (c *client) getCurrentURL() string {
 		zap.L().Debug("current url is empty", zap.Error(err))
 	}
 	return url
+}
+
+func (c *client) saveCurrentScreenshot(dirPath string, name string) error {
+	zap.L().Debug("saving screenshot", zap.String("dir_path", dirPath), zap.String("name", name))
+	if c.debug {
+		ss, err := c.wd.Screenshot()
+		if err != nil {
+			return fmt.Errorf("failed to take screenshot: %w", err)
+		}
+		zap.L().Debug("took screenshot", zap.String("dir_path", dirPath), zap.String("name", name))
+		path := filepath.Join(dirPath, name)
+		if err := ioutil.WriteFile(path, ss, fs.FileMode(0644)); err != nil {
+			return fmt.Errorf("failed to write screenshot: %w", err)
+		}
+		zap.L().Debug("saved screenshot", zap.String("dir_path", dirPath), zap.String("name", name))
+	}
+	return nil
 }
