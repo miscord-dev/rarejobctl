@@ -301,6 +301,8 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 	c.saveCurrentScreenshot(rarejobctlTempDir, "reservation_completed.png")
 	zap.L().Debug("reservation completed")
 
+	c.flushConsoleLogs()
+
 	return &Reserve{
 		Name:    tutors[0].Name,
 		StartAt: tutors[0].AvailableSlots[0],
@@ -313,14 +315,6 @@ func (c *client) Teardown() error {
 
 	if c.wd != nil {
 		zap.L().Debug("quitting current webdriver session")
-		// output console log
-		clog, err := c.wd.Log(log.Browser)
-		if err != nil {
-			return fmt.Errorf("failed to get console log: %w", err)
-		}
-		for _, l := range clog {
-			zap.L().Debug(l.Message, zap.Time("timestamp", l.Timestamp), zap.String("level", string(l.Level)))
-		}
 		if err := c.wd.Quit(); err != nil {
 			return fmt.Errorf("failed to quit current webdriver session: %w", err)
 		}
@@ -333,10 +327,15 @@ func (c *client) Teardown() error {
 	return nil
 }
 
-func formatConsoleLogs(logs []log.Message) []string {
-	var s []string
-	for _, l := range logs {
-		s = append(s, fmt.Sprintf("%s: %s", l.Timestamp, l.Message))
+func (c *client) flushConsoleLogs() []string {
+	defer zap.L().Sync()
+
+	// output console log
+	clog, err := c.wd.Log(log.Browser)
+	if err != nil {
+		zap.L().Warn("failed to get console log", zap.Error(err))
 	}
-	return s
+	for _, l := range clog {
+		zap.L().Debug(l.Message, zap.Time("timestamp", l.Timestamp), zap.String("level", string(l.Level)))
+	}
 }
