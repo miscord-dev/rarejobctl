@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/tebeka/selenium"
+	"github.com/tebeka/selenium/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -92,6 +93,7 @@ func NewClient(opts ClientOpts) (Client, error) {
 
 	urlPrefix := fmt.Sprintf("http://%s:%d/wd/hub", url, port)
 	caps := selenium.Capabilities{"browserName": browserName}
+	caps.SetLogLevel(log.Browser, log.All)
 
 	// Connect to the WebDriver instance running locally.
 	var wd selenium.WebDriver
@@ -307,7 +309,18 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 }
 
 func (c *client) Teardown() error {
+	defer zap.L().Sync()
+
 	if c.wd != nil {
+		zap.L().Debug("quitting current webdriver session")
+		// output console log
+		clog, err := c.wd.Log(log.Browser)
+		if err != nil {
+			return fmt.Errorf("failed to get console log: %w", err)
+		}
+		for _, l := range clog {
+			zap.L().Debug(l.Message, zap.Time("timestamp", l.Timestamp), zap.String("level", string(l.Level)))
+		}
 		if err := c.wd.Quit(); err != nil {
 			return fmt.Errorf("failed to quit current webdriver session: %w", err)
 		}
@@ -318,4 +331,12 @@ func (c *client) Teardown() error {
 		}
 	}
 	return nil
+}
+
+func formatConsoleLogs(logs []log.Message) []string {
+	var s []string
+	for _, l := range logs {
+		s = append(s, fmt.Sprintf("%s: %s", l.Timestamp, l.Message))
+	}
+	return s
 }
