@@ -327,7 +327,7 @@ func (c *client) Teardown() error {
 	return nil
 }
 
-func (c *client) flushConsoleLogs() []string {
+func (c *client) flushConsoleLogs() {
 	defer zap.L().Sync()
 
 	// output console log
