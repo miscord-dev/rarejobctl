@@ -9,14 +9,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
-      - uses: docker/metadata-action@v3
+      - uses: docker/metadata-action@v4
         id: meta-binary
         with:
           images: ghcr.io/musaprg/rarejobctl
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-      - uses: docker/metadata-action@v3
+      - uses: docker/metadata-action@v4
         id: meta-standalone
         with:
           images: ghcr.io/musaprg/rarejobctl-standalone
