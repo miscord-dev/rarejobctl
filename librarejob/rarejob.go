@@ -117,6 +117,8 @@ func NewClient(opts ClientOpts) (Client, error) {
 		if err != nil {
 			zap.L().Warn("failed to access to the selenium server, retrying...", zap.Error(err))
 			time.Sleep(time.Second * seleniumHealthCheckRetrySecond)
+		} else {
+			break
 		}
 	}
 	if err != nil {
