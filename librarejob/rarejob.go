@@ -209,6 +209,7 @@ func (c *client) Login(ctx context.Context, username, password string) error {
 
 func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.Duration) (*Reserve, error) {
 	defer zap.L().Sync()
+	defer c.flushConsoleLogs()
 
 	// TODO(musaprg): split this function into two
 
@@ -300,8 +301,6 @@ func (c *client) ReserveTutor(ctx context.Context, from time.Time, margin time.D
 	waitUntilURLChanged(c.wd, rarejobReservationFinishURL)
 	c.saveCurrentScreenshot(rarejobctlTempDir, "reservation_completed.png")
 	zap.L().Debug("reservation completed")
-
-	c.flushConsoleLogs()
 
 	return &Reserve{
 		Name:    tutors[0].Name,
