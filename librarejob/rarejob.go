@@ -49,10 +49,18 @@ type Client interface {
 	Teardown() error
 }
 
+type browserType string
+
+const (
+	browserTypeFirefox browserType = "firefox"
+	browserTypeChrome  browserType = "chrome"
+)
+
 type client struct {
-	s     *selenium.Service
-	wd    selenium.WebDriver
-	debug bool
+	s       *selenium.Service
+	wd      selenium.WebDriver
+	browser browserType
+	debug   bool
 }
 
 type ClientOpts struct {
@@ -70,7 +78,7 @@ func NewClient(opts ClientOpts) (Client, error) {
 	var err error
 	url := "127.0.0.1"
 	port := 4444
-	browserName := "firefox"
+	browserName := browserTypeFirefox
 	if opts.SeleniumHost == "" {
 		if opts.SeleniumPort != nil {
 			port = *opts.SeleniumPort
@@ -88,7 +96,14 @@ func NewClient(opts ClientOpts) (Client, error) {
 	}
 
 	if opts.SeleniumBrowserName != "" {
-		browserName = opts.SeleniumBrowserName
+		switch opts.SeleniumBrowserName {
+		case string(browserTypeFirefox):
+			browserName = browserTypeFirefox
+		case string(browserTypeChrome):
+			browserName = browserTypeChrome
+		default:
+			return nil, fmt.Errorf("invalid browser name: %s", opts.SeleniumBrowserName)
+		}
 	}
 
 	urlPrefix := fmt.Sprintf("http://%s:%d/wd/hub", url, port)
@@ -328,6 +343,11 @@ func (c *client) Teardown() error {
 
 func (c *client) flushConsoleLogs() {
 	defer zap.L().Sync()
+
+	if c.browser != browserTypeChrome {
+		zap.L().Warn("console log is only available for chrome browser")
+		return
+	}
 
 	// output console log
 	clog, err := c.wd.Log(log.Browser)
