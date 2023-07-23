@@ -107,7 +107,7 @@ func NewClient(opts ClientOpts) (Client, error) {
 	}
 
 	urlPrefix := fmt.Sprintf("http://%s:%d/wd/hub", url, port)
-	caps := selenium.Capabilities{"browserName": browserName}
+	caps := selenium.Capabilities{"browserName": string(browserName)}
 	caps.SetLogLevel(log.Browser, log.All)
 
 	// Connect to the WebDriver instance running locally.
