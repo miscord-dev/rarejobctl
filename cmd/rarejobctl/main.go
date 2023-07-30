@@ -65,15 +65,6 @@ func main() {
 
 	zap.L().Info("initialized rarejob client")
 
-	zap.L().Info("attempting to login rarejob...")
-
-	if err := rc.Login(context.TODO(), os.Getenv("RAREJOB_EMAIL"), os.Getenv("RAREJOB_PASSWORD")); err != nil {
-		api.PostMessage(os.Getenv("SLACK_CHANNEL"), slack.MsgOptionText("something went wrong... I failed to reserve your tutor. try again later.", false), slack.MsgOptionAsUser(true))
-		zap.L().Fatal("failed to login", zap.Error(err))
-	}
-
-	zap.L().Info("logged in to rarejob")
-
 	tt := strings.Split(*t, ":")
 	if len(tt) != 2 {
 		zap.L().Fatal("invalid time format", zap.String("input", *t))
@@ -86,6 +77,13 @@ func main() {
 
 	zap.L().Info("start reserving tutor", zap.Int("year", *year), zap.Int("month", *month), zap.Int("day", *day), zap.String("time", *t))
 	for attempt := 0; attempt < *maxRetryReservation; attempt++ {
+		zap.L().Info("attempting to login rarejob...")
+
+		if err := rc.Login(context.TODO(), os.Getenv("RAREJOB_EMAIL"), os.Getenv("RAREJOB_PASSWORD")); err != nil {
+			api.PostMessage(os.Getenv("SLACK_CHANNEL"), slack.MsgOptionText("something went wrong... I failed to reserve your tutor. try again later.", false), slack.MsgOptionAsUser(true))
+			zap.L().Fatal("failed to login", zap.Error(err))
+		}
+
 		zap.L().Info("attempting to reserve tutor", zap.Int("attempt", attempt+1))
 		r, err = rc.ReserveTutor(context.TODO(), from, time.Minute*time.Duration(*margin))
 		if r != nil {
