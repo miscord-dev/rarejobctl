@@ -1,5 +1,5 @@
 {
-  "extends": ["config:base"],
+  "extends": ["config:recommended", ":disableDependencyDashboard"],
   "platformAutomerge": true,
   "packageRules": [
     {
