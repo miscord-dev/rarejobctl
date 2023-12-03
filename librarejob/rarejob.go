@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/tebeka/selenium"
@@ -203,16 +204,13 @@ func (c *client) Login(ctx context.Context, username, password string) error {
 	}
 
 	if err := c.wd.Wait(func(wd selenium.WebDriver) (bool, error) {
-		zap.L().Debug("checking if the login has been completed", zap.String("url", c.getCurrentURL()))
-		cks, err := c.wd.GetCookies()
-		if err != nil {
-			return false, err
+		currentURL := c.getCurrentURL()
+		zap.L().Debug("checking if the login has been completed", zap.String("url", currentURL))
+
+		if strings.HasPrefix(currentURL, "https://www.rarejob.com/mypage/") {
+			return true, nil
 		}
-		for _, ck := range cks {
-			if ck.Name == "PHPSESSID" && ck.Domain == "www.rarejob.com" {
-				return true, nil
-			}
-		}
+
 		return false, nil
 	}); err != nil {
 		return fmt.Errorf("login failed: %w", err)
