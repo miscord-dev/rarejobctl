@@ -207,7 +207,7 @@ func (c *client) Login(ctx context.Context, username, password string) error {
 		currentURL := c.getCurrentURL()
 		zap.L().Debug("checking if the login has been completed", zap.String("url", currentURL))
 
-		if strings.HasPrefix(currentURL, "https://www.rarejob.com/mypage/") {
+		if strings.HasPrefix(currentURL, rarejobMyPageURL) {
 			return true, nil
 		}
 
