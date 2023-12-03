@@ -31,6 +31,9 @@ var (
 	slackChannel  = os.Getenv("SLACK_CHANNEL")
 
 	slackAPI = slack.New(slackAPIToken)
+
+	// via Slack incoming webhook
+	slackWebhookURL = os.Getenv("SLACK_WEBHOOK_URL")
 )
 
 func init() {
@@ -118,5 +121,10 @@ func postMessage(text string) {
 	switch {
 	case slackAPIToken != "":
 		slackAPI.PostMessage(slackChannel, slack.MsgOptionText(text, false), slack.MsgOptionAsUser(true))
+
+	case slackWebhookURL != "":
+		slack.PostWebhook(slackWebhookURL, &slack.WebhookMessage{
+			Text: text,
+		})
 	}
 }
