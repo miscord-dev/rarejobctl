@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/disgoorg/disgo/webhook"
 	"github.com/musaprg/rarejobctl/librarejob"
 	"github.com/slack-go/slack"
 	"go.uber.org/zap"
@@ -34,6 +35,11 @@ var (
 
 	// via Slack incoming webhook
 	slackWebhookURL = os.Getenv("SLACK_WEBHOOK_URL")
+
+	// via Discord incoming webhook
+	discrdWebhookURL = os.Getenv("DISCORD_WEBHOOK_URL")
+
+	discrdWebhookClient, _ = webhook.NewWithURL(discrdWebhookURL)
 )
 
 func init() {
@@ -126,5 +132,8 @@ func postMessage(text string) {
 		slack.PostWebhook(slackWebhookURL, &slack.WebhookMessage{
 			Text: text,
 		})
+
+	case discrdWebhookClient != nil:
+		discrdWebhookClient.CreateContent(text)
 	}
 }
