@@ -39,7 +39,7 @@ var (
 	// via Discord incoming webhook
 	discrdWebhookURL = os.Getenv("DISCORD_WEBHOOK_URL")
 
-	discrdWebhookClient, _ = webhook.NewWithURL(discrdWebhookURL)
+	discordWebhookClient, _ = webhook.NewWithURL(discrdWebhookURL)
 )
 
 func init() {
@@ -133,7 +133,7 @@ func postMessage(text string) {
 			Text: text,
 		})
 
-	case discrdWebhookClient != nil:
-		discrdWebhookClient.CreateContent(text)
+	case discordWebhookClient != nil:
+		discordWebhookClient.CreateContent(text)
 	}
 }
