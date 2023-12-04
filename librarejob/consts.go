@@ -22,6 +22,7 @@ const (
 
 	rarejobLoginURL             = "https://www.rarejob.com/account/login/"
 	rarejobReservationFinishURL = "https://www.rarejob.com/reservation/reserve/finish/"
+	rarejobMyPageURL            = "https://www.rarejob.com/mypage/"
 )
 
 const (
