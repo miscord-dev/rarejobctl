@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/slack-go/slack v0.12.2
 	github.com/tebeka/selenium v0.9.9
-	go.uber.org/zap v1.25.0
+	go.uber.org/zap v1.26.0
 )
 
 require (
