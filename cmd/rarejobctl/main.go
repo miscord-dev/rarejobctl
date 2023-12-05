@@ -126,14 +126,26 @@ End: %s
 func postMessage(text string) {
 	switch {
 	case slackAPIToken != "":
-		slackAPI.PostMessage(slackChannel, slack.MsgOptionText(text, false), slack.MsgOptionAsUser(true))
+		_, _, err := slackAPI.PostMessage(slackChannel, slack.MsgOptionText(text, false), slack.MsgOptionAsUser(true))
+		if err != nil {
+			zap.L().Warn("failed to post message to slack", zap.Error(err))
+		}
 
 	case slackWebhookURL != "":
-		slack.PostWebhook(slackWebhookURL, &slack.WebhookMessage{
+		err := slack.PostWebhook(slackWebhookURL, &slack.WebhookMessage{
 			Text: text,
 		})
+		if err != nil {
+			zap.L().Warn("failed to post message to slack", zap.Error(err))
+		}
 
 	case discordWebhookClient != nil:
-		discordWebhookClient.CreateContent(text)
+		_, err := discordWebhookClient.CreateContent(text)
+		if err != nil {
+			zap.L().Warn("failed to post message to discord", zap.Error(err))
+		}
+
+	default:
+		zap.L().Warn("no slack or discord webhook is configured")
 	}
 }
