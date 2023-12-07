@@ -18,7 +18,7 @@ const (
 	//
 	// example query URL: 2022/10/9 10:00~10:30で空いていて、ビジネス教材対応の講師。総合評価順。
 	//	https://www.rarejob.com/reservation/?year=2022&month=10&day=9&page=1&lessonTime_from=1000&lessonTime_to=1030&characteristics=4&isSaveCookie=1&order=1
-	rarejobTutorSearchURL = "https://www.rarejob.com/reservation/?year=%d&month=%d&day=%d&page=1&lessonTime_from=%d&lessonTime_to=%d&freeWord_target=1&characteristics=4&order=1"
+	rarejobTutorSearchURL = "https://www.rarejob.com/reservation/?year=%d&month=%d&day=%d&page=1&lessonTime_from=%d&lessonTime_to=%d&freeWord_target=1&order=1&onlyFilipinoTutor=%d&characteristics=%s"
 
 	rarejobLoginURL             = "https://www.rarejob.com/account/login/"
 	rarejobReservationFinishURL = "https://www.rarejob.com/reservation/reserve/finish/"
