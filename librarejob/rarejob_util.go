@@ -54,7 +54,11 @@ func generateTutorSearchQuery(from, by time.Time) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf(rarejobTutorSearchURL, from.Local().Year(), from.Local().Month(), from.Local().Day(), s, e), nil
+	// TODO(musaprg): make this configurable via flag
+	onlyFilipinoTutor := 1
+	// TODO(musaprg): make this configurable via flag
+	characteristics := "4"
+	return fmt.Sprintf(rarejobTutorSearchURL, from.Local().Year(), from.Local().Month(), from.Local().Day(), s, e, int(onlyFilipinoTutor), characteristics), nil
 }
 
 func parseTime(s string) (h, m int, err error) {
