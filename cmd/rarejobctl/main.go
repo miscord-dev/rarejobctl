@@ -89,7 +89,7 @@ func main() {
 	var r *librarejob.Reserve
 
 	zap.L().Info("start reserving tutor", zap.Int("year", *year), zap.Int("month", *month), zap.Int("day", *day), zap.String("time", *t))
-	for attempt := 0; attempt < *maxRetryReservation; attempt++ {
+	for attempt := 0; attempt <= *maxRetryReservation; attempt++ {
 		zap.L().Info("attempting to login rarejob...")
 
 		if err := rc.Login(context.TODO(), os.Getenv("RAREJOB_EMAIL"), os.Getenv("RAREJOB_PASSWORD")); err != nil {
