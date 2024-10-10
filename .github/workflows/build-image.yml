@@ -1,6 +1,8 @@
 name: Build a container image
 on:
   push:
+    branches:
+      - master
     tags:
       - "v*"
 jobs:
@@ -14,6 +16,7 @@ jobs:
         with:
           images: ghcr.io/miscord-dev/rarejobctl
           tags: |
+            type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
       - uses: docker/metadata-action@v5
@@ -21,6 +24,7 @@ jobs:
         with:
           images: ghcr.io/miscord-dev/rarejobctl-standalone
           tags: |
+            type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
       - uses: docker/login-action@v3
