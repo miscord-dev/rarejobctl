@@ -13,7 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o rarejobctl ./cmd/
 
 
 # Selenium webdriver
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 COPY --from=builder /src/rarejobctl /usr/bin/
 CMD ["rarejobctl"]
 
