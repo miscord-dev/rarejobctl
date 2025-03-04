@@ -2,7 +2,7 @@ module github.com/musaprg/rarejobctl
 
 go 1.21
 
-toolchain go1.23.2
+toolchain go1.24.1
 
 require (
 	github.com/disgoorg/disgo v0.17.0
