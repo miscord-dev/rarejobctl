@@ -1,8 +1,6 @@
 module github.com/musaprg/rarejobctl
 
-go 1.21
-
-toolchain go1.23.2
+go 1.25.0
 
 require (
 	github.com/disgoorg/disgo v0.17.0
@@ -18,5 +16,5 @@ require (
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/sasha-s/go-csync v0.0.0-20210812194225-61421b77c44b // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/net v0.18.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 )
